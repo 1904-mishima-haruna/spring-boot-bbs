@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <link th:href="@{/css/style.css}" rel="styleSheet">
+    <title>TOP</title>
+</head>
+<body>
+<div class="header-contents">
+    <h1>匿名掲示板</h1>
+</div>
+<div class="main-contents">
+    <form action="/">
+        日付：<input type="date" name="start" th:value="${start}" />～<input type="date" name="end" th:value="${end}" /><input type="submit" value="絞り込み">
+    </form>
+    <br />
+
+    <a href="/new">
+        <button class="new-button" type="button">新規投稿</button>
+    </a>
+    <div class="message-icon" th:each="content : ${contents}">
+        <div>
+            ID : <span th:text="${content.id}"/>
+        </div>
+        <div class="text">
+            投稿 : <span th:text="${content.content}"/>
+        </div>
+        <div>
+            更新日時 : <span th:text="${content.updatedDate}"/>
+        </div>
+        <!-- 削除ボタンの実装 -->
+        <form method="post" th:action="@{/delete/{id}(id=${content.id})}">
+            <input type="hidden" name="id" th:value="*{id}">
+            <input type="submit" value="削除">
+        </form>
+
+        <!-- 編集ボタンの実装 -->
+        <a th:href="@{/edit/{id}(id=${content.id})}">
+            <input type="button" value="編集">
+        </a>
+
+        <!-- コメントボタンとテキストボックスの実装 -->
+        <form method="post" action="/comment">
+
+            <!-- エラーメッセージの表示 -->
+            <div th:if="${reportID == content.id}">
+                <div th:if="${validationError}" th:each="error : ${validationError}">
+                    <div th:text="${error}"></div>
+                </div>
+            </div>
+
+            <div class="form-area">
+                <label>コメント内容</label>
+                <textarea class="tweet-box" name="reContent" size="20" maxlength="200"></textarea><br/>
+                <input type="hidden" name="contentId" th:value="${content.id}">
+                <input type="hidden" name="content" th:value="${content.content}">
+                <input type="submit" value="コメント" />
+            </div>
+        </form>
+
+        <!-- コメントの表示 -->
+        <div class="message-icon" th:each="comment : ${comments}">
+            <div th:if="${content.id == comment.contentId}">
+                <div class="text">
+                    コメント : <span th:text="${comment.reContent}"/>
+                </div>
+                <div>
+                    更新日時 : <span th:text="${comment.updatedDate}"/>
+                </div>
+                <!-- コメント編集ボタン -->
+                <a th:href="@{/commentEdit/{id}(id=${comment.id})}">
+                    <input type="submit" value="編集">
+                </a>
+                <!-- コメント削除ボタンの実装 -->
+                <form method="post" th:action="@{/commentDelete/{id}(id=${comment.id})}">
+                    <input type="hidden" name="id" th:value="${comment.id}">
+                    <input type="submit" value="コメント削除">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
